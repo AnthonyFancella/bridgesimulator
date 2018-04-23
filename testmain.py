@@ -26,10 +26,9 @@ class MyApp(ShowBase):
     self.stars.reparentTo(self.render)
     self.stars.setPos(0, 0, 0)
     
-    self.ship = self.loader.loadModel('models/puddle_jumper.egg')
+    self.ship = self.loader.loadModel('models/ship.egg')
     self.ship.reparentTo(self.render)
     self.ship.setPos(0, 0, 0)
-    self.ship.setScale(.05, .05, .05)
     
     self.accept("arrow_left", self.setKey, ['roll_left', True])
     self.accept("arrow_right", self.setKey, ['roll_right', True])
@@ -57,18 +56,28 @@ class MyApp(ShowBase):
   def moveShip(self, task):
     dt = globalClock.getDt()
     
+    heading  = self.ship.getH()
+    pitch    = self.ship.getP()
+    rotation = self.ship.getR()
+    
     if self.keyMap['yaw_left']:
-      self.ship.setH(self.ship.getH() + self.turnRate)
+      heading += self.turnRate * dt
+      self.ship.setH(self.ship, heading % 360)
     if self.keyMap['yaw_right']:
-      self.ship.setH(self.ship.getH() - self.turnRate)
+      heading -= self.turnRate * dt
+      self.ship.setH(self.ship, heading % 360)
     if self.keyMap['up']:
-      self.ship.setP(self.ship.getP() + self.turnRate)
+      pitch -= self.turnRate * dt
+      self.ship.setP(self.ship, pitch % 360)
     if self.keyMap['down']:
-      self.ship.setP(self.ship.getP() - self.turnRate)
+      pitch += self.turnRate * dt
+      self.ship.setP(self.ship, pitch % 360)
     if self.keyMap['roll_left']:
-      self.ship.setR(self.ship.getR() + self.turnRate)
+      rotation += self.turnRate * dt
+      self.ship.setR(self.ship, rotation % 360)
     if self.keyMap['roll_right']:
-      self.ship.setR(self.ship.getR() - self.turnRate)
+      rotation -= self.turnRate * dt
+      self.ship.setR(self.ship, rotation % 360)
       
       
     if self.keyMap['forward'] and self.impulseEngine <= self.maxSpeed:
@@ -78,7 +87,7 @@ class MyApp(ShowBase):
       
     self.camera.setPos(self.ship.getX(), self.ship.getY() + 20, self.ship.getZ())
     self.camera.lookAt(self.ship)
-    self.stars.setPos(self.ship.getPos())
+    self.stars.setPos(self.ship.getX(), self.ship.getY(), self.ship.getZ())
     
     self.ship.setY(self.ship, (self.impulseEngine * -1) * dt)
     

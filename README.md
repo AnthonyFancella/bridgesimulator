@@ -8,4 +8,5 @@ Any help is appreciated, this README file will house the to do list until there 
 TO DO
 -------------------------------------------
 
-Pretty Much everything
+Make the ship turn slower
+Implement DaveNetGame
