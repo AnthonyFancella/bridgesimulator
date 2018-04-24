@@ -21,6 +21,7 @@ class MyApp(ShowBase):
       }
     
     self.taskMgr.add(self.moveShip, "moveShipTask")
+    self.taskMgr.add(self.skySphereTask, "SkySphere")
     
     self.stars = self.loader.loadModel('models/SkySphere.bam')
     self.stars.reparentTo(self.render)
@@ -52,42 +53,40 @@ class MyApp(ShowBase):
 #    self.maxTurnRate      = 1
     self.maxSpeed         = 350
     self.minSpeed         = -350
+    self.heading          = 0
+    self.pitch            = 0
+    self.rotation         = 0
     
   def moveShip(self, task):
     dt = globalClock.getDt()
     
-    heading  = self.ship.getH()
-    pitch    = self.ship.getP()
-    rotation = self.ship.getR()
-    
-    if self.keyMap['yaw_left']:
-      heading += self.turnRate * dt
-      self.ship.setH(self.ship, heading % 360)
     if self.keyMap['yaw_right']:
-      heading -= self.turnRate * dt
-      self.ship.setH(self.ship, heading % 360)
+      heading = self.ship.getH(self.ship)
+      self.ship.setH(self.ship, heading + self.turnRate)
+    if self.keyMap['yaw_left']:
+      heading = self.ship.getH(self.ship)
+      self.ship.setH(self.ship, heading - self.turnRate)
     if self.keyMap['up']:
-      pitch -= self.turnRate * dt
-      self.ship.setP(self.ship, pitch % 360)
+      pitch = self.ship.getP(self.ship)
+      self.ship.setP(self.ship, pitch - self.turnRate)
     if self.keyMap['down']:
-      pitch += self.turnRate * dt
-      self.ship.setP(self.ship, pitch % 360)
+      pitch = self.ship.getP(self.ship)
+      self.ship.setP(self.ship, pitch + self.turnRate)
     if self.keyMap['roll_left']:
-      rotation += self.turnRate * dt
-      self.ship.setR(self.ship, rotation % 360)
+      rotation = self.ship.getR(self.ship)
+      self.ship.setR(self.ship, rotation + self.turnRate)
     if self.keyMap['roll_right']:
-      rotation -= self.turnRate * dt
-      self.ship.setR(self.ship, rotation % 360)
-      
+      rotation = self.ship.getR(self.ship)
+      self.ship.setR(self.ship, rotation - self.turnRate)
       
     if self.keyMap['forward'] and self.impulseEngine <= self.maxSpeed:
       self.impulseEngine += 1
     if self.keyMap['backward'] and self.impulseEngine >= self.minSpeed:
       self.impulseEngine -= 1
       
-    self.camera.setPos(self.ship.getX(), self.ship.getY() + 20, self.ship.getZ())
+    self.camera.setPos(self.ship, 0, -20, -10)
+    self.camera.setR(self.ship, self.ship.getR())
     self.camera.lookAt(self.ship)
-    self.stars.setPos(self.ship.getX(), self.ship.getY(), self.ship.getZ())
     
     self.ship.setY(self.ship, (self.impulseEngine * -1) * dt)
     
@@ -96,6 +95,10 @@ class MyApp(ShowBase):
   def setKey(self, key, value):
     self.keyMap[key] = value
     print self.keyMap
+    
+  def skySphereTask(self, task):
+    self.stars.setPos(self.camera, 0, 0, 0)
+    return task.cont
     
 app = MyApp()
 app.run()
